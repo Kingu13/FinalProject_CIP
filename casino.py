@@ -9,7 +9,11 @@ import random
 canvas_width = 1200
 canvas_height = 600
 
-symbols = ['🍇', '🍌', '🍒']
+symbols = {
+    '🍇': 0.5556, # 55.56% chance to get
+    '🍌': 0.2778, # 27.78% chance to get
+    '🍒': 0.1667  # 16.67% chance to get
+    }
 
 balance = 1000
 bet_amount = 0
@@ -20,21 +24,8 @@ def main():
 
     canvas = tk.Canvas(casino, width=canvas_width, height=canvas_height, bg="black")
     canvas.pack()
-    
-    # Load the background image
-    original_image = Image.open(r"C:\Users\jespe\codeInPlaceFinalProject\slotsMachine.png")
-    
-    # Resize the image to fit the canvas
-    resized_image = original_image.resize((canvas_width, canvas_height))
 
-    # Convert the resized image to a PhotoImage object
-    background_image = ImageTk.PhotoImage(resized_image)
-    
-    # Create the background image on the canvas
-    canvas.create_image(0, 0, anchor=tk.NW, image=background_image, tags="background")
-    canvas.background_image = background_image
-    
-    main_menu(canvas, casino, background_image)
+    main_menu(canvas, casino)
 
     # Bind left mouse click to the function on_left_click
     canvas.bind("<Button-1>", lambda event: on_left_click(event, canvas))
@@ -44,8 +35,8 @@ def main():
 
     casino.mainloop()
 
-def main_menu(canvas, casino, background_image):
-    clear_canvas(canvas, background_image)
+def main_menu(canvas, casino):
+    clear_canvas(canvas)
     x = canvas_width / 2
     y = canvas_height / 2
 
@@ -53,21 +44,28 @@ def main_menu(canvas, casino, background_image):
     canvas.create_text(x, y, text=welcome_text, anchor=tk.CENTER, font=("Times New Roman", 42), fill="white")
 
     # Show Balance
+    global balance_text_change
     balance_text = "Balance: $" + str(balance)
-    canvas.create_text(1000, 560, text=balance_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
+    balance_text_change = canvas.create_text(1000, 560, text=balance_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
 
     play_text = canvas.create_text(x, y + 90, text="● Press here to play slots", anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
-    canvas.tag_bind(play_text, "<Button-1>", partial(play_slots, canvas=canvas, casino=casino, background_image=background_image))
+    canvas.tag_bind(play_text, "<Button-1>", partial(play_slots, canvas=canvas, casino=casino))
 
     exit_text = canvas.create_text(x, y + 150, text="● Exit", anchor=tk.CENTER, font=("Times New Roman", 16), fill="white")
     canvas.tag_bind(exit_text, "<Button-1>", partial(exit, casino=casino))
 
-def play_slots(event, canvas, casino, background_image):
-    clear_canvas(canvas, background_image)
+def play_slots(event, canvas, casino):
+    clear_canvas(canvas)
 
+    display_how_to_win_and_payout(canvas)
     # Showing Balance
+    global balance_text_change
     balance_text = "Balance: $" + str(balance)
-    canvas.create_text(1000, 560, text=balance_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
+    balance_text_change = canvas.create_text(1000, 560, text=balance_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
+    
+    global bet_amount_change
+    bet_amount_new = "Bet Amount: $" + str(bet_amount)
+    bet_amount_change = canvas.create_text(1000, 460, text=bet_amount_new, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
 
     # Exit to main menu text
     exit_text = canvas.create_text(180, 560, text="Exit", anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
@@ -81,14 +79,14 @@ def play_slots(event, canvas, casino, background_image):
     entry.place(x=915, y=500)
 
     # Button to submit the bet amount and spin
-    submit_button = tk.Button(casino, text="Bet", command=lambda: bet_and_spin(canvas, casino, background_image), font=("Times New Roman", 12))
+    submit_button = tk.Button(casino, text="Bet", command=lambda: bet_and_spin(canvas, casino), font=("Times New Roman", 12))
     submit_button.place(x=1040, y=500)
     
     # Button to spin with the same bet amount
-    spin_button = tk.Button(casino, text="Spin", command=lambda: spin_same_bet(canvas, casino, background_image), font=("Times New Roman", 12))
+    spin_button = tk.Button(casino, text="Spin", command=lambda: spin_same_bet(canvas, casino), font=("Times New Roman", 12))
     spin_button.place(x=800, y=300)
 
-def bet_and_spin(canvas, casino, background_image):
+def bet_and_spin(canvas, casino):
     global bet_amount
     global balance
 
@@ -106,12 +104,14 @@ def bet_and_spin(canvas, casino, background_image):
         return
     else:
         balance -= bet_amount
+        update_balance(canvas)
+        update_bet_amount(canvas)
         entry.delete(0, tk.END)  # Clear the entry widget after retrieving the input
         # Spin the slot machine
-        winning_symbols = spin(canvas, casino, symbols, background_image)
+        winning_symbols = spin(canvas, casino, symbols)
         check_winning(canvas, winning_symbols, bet_amount)
 
-def spin_same_bet(canvas, casino, background_image):
+def spin_same_bet(canvas, casino):
     global bet_amount
     global balance
 
@@ -123,8 +123,9 @@ def spin_same_bet(canvas, casino, background_image):
         return
     else:
         balance -= bet_amount
+        update_balance(canvas)
         # Spin the slot machine
-        winning_symbols = spin(canvas, casino, symbols, background_image)
+        winning_symbols = spin(canvas, casino, symbols)
         check_winning(canvas, winning_symbols, bet_amount)
 
 def build_slot_machine(canvas):
@@ -143,6 +144,10 @@ def build_slot_machine(canvas):
     # Calculate the starting y-coordinate for the first row
     start_y = (canvas_height - total_height) / 2
 
+    
+    
+    
+    
     for i in range(BOX_ROW):
         for j in range(BOX_ROW):
             end_x = start_x + BOX_SIZE
@@ -158,18 +163,25 @@ def build_slot_machine(canvas):
         start_x = (canvas_width - total_width) / 2  # Reset start_x for the next row
         start_y += BOX_SIZE + BOX_SPACING  # Move to the next row    
 
-def spin(canvas, casino, symbols, background_image):
+def spin(canvas, casino, symbols):
     # To remove symbols from spins before, so they don't stack.
-    clear_canvas(canvas, background_image)
+    clear_canvas(canvas)
 
+    display_how_to_win_and_payout(canvas)
+    
     build_slot_machine(canvas)
 
     # Showing Balance
+    global balance_text_change
     balance_text = "Balance: $" + str(balance)
-    canvas.create_text(1000, 560, text=balance_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
+    balance_text_change = canvas.create_text(1000, 560, text=balance_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
+    
+    global bet_amount_change
+    bet_amount_text = "Bet Amount: $" + str(bet_amount)
+    bet_amount_change = canvas.create_text(1000, 460, text=bet_amount_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
 
     # Exit to main menu text
-    exit_text = canvas.create_text(200 , canvas_height / 2 + 280 , text="Exit", anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
+    exit_text = canvas.create_text(180, 560, text="Exit", anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
     canvas.tag_bind(exit_text, "<Button-1>", partial(exit, casino=casino))
 
     BOX_ROW = 3
@@ -191,9 +203,7 @@ def spin(canvas, casino, symbols, background_image):
 
     for i in range(BOX_ROW):
         for j in range(BOX_ROW):
-            end_x = start_x + BOX_SIZE
-            end_y = start_y + BOX_SIZE
-            symbol = random.choice(symbols)
+            symbol = random_symbol(symbols)
             winning_symbols.append(symbol)
 
             canvas.create_text(start_x + BOX_SIZE / 2,
@@ -214,11 +224,34 @@ def check_winning(canvas, winning_symbols, bet_amount):
     y = canvas_height / 4
 
     winning_symbols = winning_symbols[3:-3]
-    if winning_symbols == ['🍇','🍇','🍇'] or winning_symbols == ['🍒','🍒','🍒'] or winning_symbols == ['🍌','🍌','🍌']:
-        canvas.create_text(x, y, text="Congratulations! You have won!", anchor=tk.CENTER, font=("Times New Roman", 24), fill="white")
-        balance += bet_amount * 2
+    if winning_symbols == ['🍇','🍇','🍇']:
+        winnings = bet_amount * 3
+        # Contratulate the winner :)
+        canvas.create_text(x, y, text="Congratulations! You have won $" + str(winnings) + "!", anchor=tk.CENTER, font=("Times New Roman", 24), fill="white")
+        balance += winnings
+    elif winning_symbols == ['🍌','🍌','🍌']:
+        winnings = bet_amount * 5
+        # Contratulate the winner :)
+        canvas.create_text(x, y, text="Congratulations! You have won $" + str(winnings) + "!", anchor=tk.CENTER, font=("Times New Roman", 24), fill="white")
+        balance += winnings
+    elif winning_symbols == ['🍒','🍒','🍒']:
+        winnings = bet_amount * 10
+        # Contratulate the winner :)
+        canvas.create_text(x, y, text="Congratulations! You have won $" + str(winnings) + "!", anchor=tk.CENTER, font=("Times New Roman", 24), fill="white")
+        balance += winnings
     else:
-        canvas.create_text(x, y, text="You lost, better luck next time!", anchor=tk.CENTER, font=("Times New Roman", 24), fill="white")
+        canvas.create_text(x, y, text="You lost, better luck next time -$" + str(bet_amount), anchor=tk.CENTER, font=("Times New Roman", 24), fill="white")
+    
+    update_balance(canvas)
+
+def random_symbol(choices):
+    random_num = random.random()
+    probability_symbol = 0
+    
+    for symbol, probability in choices.items():
+        probability_symbol += probability
+        if random_num <= probability_symbol:
+            return symbol
 
 def exit(event, casino):
     casino.destroy()
@@ -230,12 +263,29 @@ def window_exit(casino):
 
 def on_left_click(event, canvas):
     x, y = event.x, event.y
-    #position_text = f"({x}, {y})"
-    #canvas.create_text(x, y, text=position_text, anchor=tk.NW, font=("Times New Roman", 12), fill="white")
+    position_text = f"({x}, {y})"
+    canvas.create_text(x, y, text=position_text, anchor=tk.NW, font=("Times New Roman", 12), fill="white")
 
-def clear_canvas(canvas, background_image):
-    canvas.delete(tk.ALL)
-    canvas.create_image(0, 0, anchor=tk.NW, image=background_image, tags="background")
+def clear_canvas(canvas):
+    canvas.delete("all")
 
+def update_balance(canvas):
+    global balance_text_change
+    balance_text = "Balance: $" + str(balance)
+    canvas.itemconfigure(balance_text_change, text=balance_text)
+
+def update_bet_amount(canvas):
+    global bet_amount_change
+    bet_amount_text = "Bet Amount: $" + str(bet_amount)
+    canvas.itemconfigure(bet_amount_change, text=bet_amount_text)
+    
+def display_how_to_win_and_payout(canvas):
+    canvas.create_text(110, 100, text="How to win ☟", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")
+    canvas.create_text(110, 120, text="3 of a kind in the middle row", anchor=tk.CENTER, font=("Times New Roman", 10), fill="white")
+    canvas.create_text(110, 150, text="| 🍇 | 🍇 | 🍇 | = Bet * 3", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")
+    canvas.create_text(110, 180, text="| 🍌 | 🍌 | 🍌 | = Bet * 5", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")
+    canvas.create_text(115, 210, text="| 🍒 | 🍒 | 🍒 | = Bet * 10", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")   
+    
+     
 if __name__ == "__main__":
     main()
