@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import messagebox
 from functools import partial
 import random
-import time
 
 # Canvas size
 canvas_width = 1200
@@ -53,7 +52,7 @@ def main_menu(canvas, casino):
     # Show Balance
     global balance_text_change
     balance_text = "Balance: $" + str(balance)
-    balance_text_change = canvas.create_text(1000, 560, text=balance_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
+    balance_text_change = canvas.create_text(1080, 560, text=balance_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
 
     # Text with a button on it to call the play_slots()
     play_text = canvas.create_text(x, y + 90, text="● Press here to play slots", anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
@@ -75,7 +74,7 @@ def play_slots(event, canvas, casino):
     # Showing bet amount.
     global bet_amount_change
     bet_amount_new = "Bet Amount: $" + str(bet_amount)
-    bet_amount_change = canvas.create_text(1000, 460, text=bet_amount_new, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
+    bet_amount_change = canvas.create_text(1080, 460, text=bet_amount_new, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
 
     # Exit the program button
     exit_text = canvas.create_text(60, 560, text="Exit", anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
@@ -86,12 +85,12 @@ def play_slots(event, canvas, casino):
 
     # Box to type in for entering bet amount.
     global entry
-    entry = tk.Entry(casino, width=15, font=("Times New Roman", 12))
-    entry.place(x=915, y=500)
+    entry = tk.Entry(casino, width=20, font=("Times New Roman", 12))
+    entry.place(x=995, y=500)
 
     # Button to submit the bet amount and spin.
     submit_button = tk.Button(casino, text="Bet", command=lambda: bet_and_spin(canvas, casino), font=("Times New Roman", 12))
-    submit_button.place(x=1040, y=500)
+    submit_button.place(x=1130, y=500)
     
     # Button to spin with the same bet amount.
     spin_button = tk.Button(casino, text="Spin", command=lambda: spin_same_bet(canvas, casino), font=("Times New Roman", 12))
@@ -156,10 +155,23 @@ def build_slot_machine(canvas):
     # Calculate the starting y value for the first row
     start_y = (canvas_height - total_height) / 2
 
+    # Creates a white L shape in the lower left corner
+    canvas.create_line(15, canvas_height - 150, 15, canvas_height - 7, fill="white", width=5)
+    canvas.create_line(15, canvas_height - 10, 158, canvas_height - 10, fill="white", width=5)
+    # Mirrors the white L shape to the lower right corner
+    canvas.create_line(canvas_width - 15, canvas_height - 150, canvas_width - 15, canvas_height - 7, fill="white", width=5)
+    canvas.create_line(canvas_width - 158, canvas_height - 10, canvas_width - 15, canvas_height - 10, fill="white", width=5)
+    
+    # Creates a white L shape in the upper left corner
+    canvas.create_line(15, 150, 15, 8, fill="white", width=5)
+    canvas.create_line(15, 10, 158, 10, fill="white", width=5)    
+    # Mirrors the white L shape to the upper right corner
+    canvas.create_line(canvas_width - 15, 150, canvas_width - 15, 8, fill="white", width=5)
+    canvas.create_line(canvas_width - 158, 10, canvas_width - 15, 10, fill="white", width=5) 
+
     # Create arrows pointing at the row which you win in.
     canvas.create_text(504, 305, text="⇨", anchor=tk.CENTER, font=("Oswald", 40), fill="white")
     canvas.create_text(697, 305, text="⇦", anchor=tk.CENTER, font=("Oswald", 40), fill="white")
-    
     
     for i in range(BOX_ROW): # Prints out the 9 boxes forming the "slots machine" 
         for j in range(BOX_ROW):
@@ -257,8 +269,8 @@ def check_winning(canvas, casino, winning_symbols, bet_amount): # Checks the win
              
     canvas.create_text(x, y, text=message, anchor=tk.CENTER, font=("Times New Roman", 24), fill="white") # Print the outcome.
     
-    if "rigged" in message:
-        canvas.after(5000, exit, None, casino) # If balance == 0 get thrown out :D
+    if "rigged" in message: # Checks if rigged is in the message, which only is in balance == 0 message
+        canvas.after(5000, exit, None, casino) # so if balance == 0 get thrown out :D
     else:
         update_balance(canvas) # Updates the balance if its a winning row, or it stays the same if losing. (Already takes away the bet amount from balance.)
 
@@ -291,20 +303,20 @@ def update_balance(canvas): # Updates the balance displayed when this function i
     global balance_text_change
     balance_text = "Balance: $" + str(balance)
     canvas.itemconfigure(balance_text_change, text=balance_text)
-    balance_text_change = canvas.create_text(1000, 560, text=balance_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
+    balance_text_change = canvas.create_text(1080, 560, text=balance_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
     
 def update_bet_amount(canvas): # Updates the bet amount displayed when this function is called.
     global bet_amount_change
     bet_amount_text = "Bet Amount: $" + str(bet_amount)
     canvas.itemconfigure(bet_amount_change, text=bet_amount_text)
-    bet_amount_change = canvas.create_text(1000, 460, text=bet_amount_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
+    bet_amount_change = canvas.create_text(1080, 460, text=bet_amount_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
     
 def display_how_to_win_and_payout(canvas): # Left corner displays how to win and payout.
-    canvas.create_text(110, 20, text="How to win ☟", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")
-    canvas.create_text(110, 50, text="3 of a kind in the middle row", anchor=tk.CENTER, font=("Times New Roman", 12), fill="white")
-    canvas.create_text(110, 80, text="| 🍇 | 🍇 | 🍇 | = Bet * 3", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")
-    canvas.create_text(110, 110, text="| 🍌 | 🍌 | 🍌 | = Bet * 5", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")
-    canvas.create_text(115, 140, text="| 🍒 | 🍒 | 🍒 | = Bet * 10", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")   
+    canvas.create_text(120, 30, text="How to win ☟", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")
+    canvas.create_text(120, 60, text="3 of a kind in the middle row", anchor=tk.CENTER, font=("Times New Roman", 12), fill="white")
+    canvas.create_text(120, 90, text="| 🍇 | 🍇 | 🍇 | = Bet * 3", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")
+    canvas.create_text(120, 120, text="| 🍌 | 🍌 | 🍌 | = Bet * 5", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")
+    canvas.create_text(125, 150, text="| 🍒 | 🍒 | 🍒 | = Bet * 10", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")   
     
 if __name__ == "__main__":
     main()
