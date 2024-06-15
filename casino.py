@@ -268,7 +268,7 @@ def check_winning(canvas, casino, winning_symbols, bet_amount): # Checks the win
         balance += winnings
     else:
         if balance == 0:
-            message = "Truth is... the game was rigged from the start. :D" # No money, no more fun :(
+            message = "Truth is... the game was rigged from the start." # No money, no more fun :(
         else:
             message = f"You lost, better luck next time -${bet_amount}" # Best wishes!
             threading.Thread(target=losing_sound).start()
