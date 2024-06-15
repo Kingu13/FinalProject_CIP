@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 from functools import partial
 import random
+from playsound import playsound
+import threading
 
 # Canvas size
 canvas_width = 1200
@@ -250,27 +252,32 @@ def check_winning(canvas, casino, winning_symbols, bet_amount): # Checks the win
         winnings = bet_amount * 3
         # Contratulate the winner :)
         message = f"Congratulations! You have won ${winnings}!"
+        threading.Thread(target=winning_sound).start()
         balance += winnings
     elif winning_symbols == ['🍌','🍌','🍌']:
         winnings = bet_amount * 5
         # Contratulate the winner :)
         message = f"Congratulations! You have won ${winnings}!"
+        threading.Thread(target=winning_sound).start()
         balance += winnings
     elif winning_symbols == ['🍒','🍒','🍒']:
         winnings = bet_amount * 10
         # Contratulate the winner :)
         message = f"Congratulations! You have won ${winnings}!"
+        threading.Thread(target=winning_sound).start()
         balance += winnings
     else:
         if balance == 0:
             message = "Truth is... the game was rigged from the start." # No money, no more fun :(
         else:
-             message = f"You lost, better luck next time -${bet_amount}" # Best wishes!
+            message = f"You lost, better luck next time -${bet_amount}" # Best wishes!
+            threading.Thread(target=losing_sound).start()
              
     canvas.create_text(x, y, text=message, anchor=tk.CENTER, font=("Times New Roman", 24), fill="white") # Print the outcome.
     
     if "rigged" in message: # Checks if rigged is in the message, which only is in balance == 0 message
-        canvas.after(5000, exit, None, casino) # so if balance == 0 get thrown out :D
+        threading.Thread(target=rigged_exit).start()
+        canvas.after(7000, exit, None, casino) # so if balance == 0 get thrown out :D
     else:
         update_balance(canvas) # Updates the balance if its a winning row, or it stays the same if losing. (Already takes away the bet amount from balance.)
 
@@ -311,6 +318,15 @@ def update_bet_amount(canvas): # Updates the bet amount displayed when this func
     canvas.itemconfigure(bet_amount_change, text=bet_amount_text)
     bet_amount_change = canvas.create_text(1080, 460, text=bet_amount_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
     
+def winning_sound():
+    playsound(r'C:\PATH\kaching.mp3') # Change PATH, right click "kaching.mp3" and COPY PATH and paste here
+
+def losing_sound():
+    playsound(r'C:\PATH\lose.mp3')   # Change PATH, right click "kaching.mp3" and COPY PATH and paste here
+
+def rigged_exit():
+    playsound(r'C:\PATH\rigged.mp3') # Change PATH, right click "rigged.mp3" and COPY PATH and paste here
+  
 def display_how_to_win_and_payout(canvas): # Left corner displays how to win and payout.
     canvas.create_text(120, 30, text="How to win ☟", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")
     canvas.create_text(120, 60, text="3 of a kind in the middle row", anchor=tk.CENTER, font=("Times New Roman", 12), fill="white")
