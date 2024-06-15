@@ -319,13 +319,13 @@ def update_bet_amount(canvas): # Updates the bet amount displayed when this func
     bet_amount_change = canvas.create_text(1080, 460, text=bet_amount_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
     
 def winning_sound():
-    playsound(r'C:\PATH\kaching.mp3') # Change PATH, right click "kaching.mp3" and COPY PATH and paste here
+    playsound(r'C:\PATH\kaching.mp3') # Change PATH, right click "kaching.mp3" and COPY PATH and paste here    Kachiiiing
 
 def losing_sound():
-    playsound(r'C:\PATH\lose.mp3')   # Change PATH, right click "kaching.mp3" and COPY PATH and paste here
+    playsound(r'C:\PATH\lose.mp3')   # Change PATH, right click "kaching.mp3" and COPY PATH and paste here     OOF
 
 def rigged_exit():
-    playsound(r'C:\PATH\rigged.mp3') # Change PATH, right click "rigged.mp3" and COPY PATH and paste here
+    playsound(r'C:\PATH\rigged.mp3') # Change PATH, right click "rigged.mp3" and COPY PATH and paste here    Warning for this one, might end with a bang :D
   
 def display_how_to_win_and_payout(canvas): # Left corner displays how to win and payout.
     canvas.create_text(120, 30, text="How to win ☟", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")
