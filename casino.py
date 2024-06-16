@@ -224,23 +224,31 @@ def spin(canvas, casino, symbols):
     start_y = (canvas_height - total_height) / 2
 
     winning_symbols = []   # creates a list that saves all the symbols printed out on the canvas, to later check for winnings.
-
+    
+    sleeping = 0
+    
     for i in range(BOX_ROW): # Prints out the symbols on the screen.
         for j in range(BOX_ROW):
             symbol = random_symbol(symbols)
             winning_symbols.append(symbol)
-
-            canvas.create_text(start_x + BOX_SIZE / 2,
-                               start_y + BOX_SIZE / 2,
-                               text=symbol,
-                               anchor=tk.CENTER,
-                               font=("Times New Roman", 24),
-                               fill="white")
+            x = start_x + BOX_SIZE / 2
+            y = start_y + BOX_SIZE / 2
+            canvas.after(sleeping, print_symbol, canvas, x, y, symbol) # Same as time.sleep but this works with tkinter
+            sleeping += 50 # Milliseconds sleep / delay on between the symbols printing out
             start_x += BOX_SIZE + BOX_SPACING  # Move to the next column
         start_x = (canvas_width - total_width) / 2  # Reset start_x for the next row
         start_y += BOX_SIZE + BOX_SPACING  # Move to the next row
     # Returning the list winning_symbols if they match. 
     return winning_symbols
+
+def print_symbol(canvas, x, y, symbol):
+    canvas.create_text(
+                        x,
+                        y,
+                        text=symbol,
+                        anchor=tk.CENTER,
+                        font=("Times New Roman", 24),
+                        fill="white")
 
 def check_winning(canvas, casino, winning_symbols, bet_amount): # Checks the winning_symbols which has 9 symbols,
     global balance
@@ -319,13 +327,13 @@ def update_bet_amount(canvas): # Updates the bet amount displayed when this func
     bet_amount_change = canvas.create_text(1080, 460, text=bet_amount_text, anchor=tk.CENTER, font=("Times New Roman", 20), fill="white")
     
 def winning_sound():
-    playsound(r'C:\PATH\kaching.mp3') # Change PATH, right click "kaching.mp3" and COPY PATH and paste here    Kachiiiing
+    playsound(r'C:\PATH\kaching.mp3') # Change PATH, right click "kaching.mp3" and COPY PATH and paste here    Kachiiiing  
 
 def losing_sound():
-    playsound(r'C:\PATH\lose.mp3')   # Change PATH, right click "kaching.mp3" and COPY PATH and paste here     OOF
+    playsound(r'C:\PATH\lose.mp3')   # Change PATH, right click "kaching.mp3" and COPY PATH and paste here     OOF  
 
 def rigged_exit():
-    playsound(r'C:\PATH\rigged.mp3') # Change PATH, right click "rigged.mp3" and COPY PATH and paste here    Warning for this one, might end with a bang :D
+    playsound(r'C:\PATH\rigged.mp3') # Change PATH, right click "rigged.mp3" and COPY PATH and paste here    Warning for this one, might end with a bang :D  
   
 def display_how_to_win_and_payout(canvas): # Left corner displays how to win and payout.
     canvas.create_text(120, 30, text="How to win ☟", anchor=tk.CENTER, font=("Times New Roman", 15), fill="white")
